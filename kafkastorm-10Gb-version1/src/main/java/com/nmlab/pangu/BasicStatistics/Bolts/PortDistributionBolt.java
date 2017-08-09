@@ -44,7 +44,7 @@ public class PortDistributionBolt implements IBasicBolt{
 		sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		// TODO Auto-generated method stub
 		try {			
-			fw = new FileWriter("F://My Software//eclipse//workspace-jee//kafkastorm-10Gb-version1//JavaScript_Code.txt",false);			
+			fw = new FileWriter("C://Users//Think//.ssh//kafkastorm-10Gb-version1//JavaScript_Code.txt",false);			
 		} catch (FileNotFoundException e) {
 			// TODO 自动生成的 catch 块
 			e.printStackTrace();

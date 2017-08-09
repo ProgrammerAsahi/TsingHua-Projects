@@ -1,6 +1,9 @@
 
 package main.java.com.nmlab.pangu.BasicStatistics.Spouts;
 
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -90,6 +93,9 @@ public class PcapSpout4jnetpcap implements IRichSpout {
 	public JBuffer buf;
 	public String src=null;
 	public String dst=null;
+	public int CountPacket=0;
+	public int CountHttpPacket=0;
+	public int CountJavascriptHttpPacket=0;
 	int id;
 	long time = 0;
 	 long slots = 0;
@@ -195,6 +201,8 @@ public class PcapSpout4jnetpcap implements IRichSpout {
 						String destination="";
 						String source="";
 						js_code="";
+						if(packet.hasHeader(http))
+							CountHttpPacket++;
 						if(packet.hasHeader(http)&&packet.hasHeader(html))
 						{
 							if(packet.hasHeader(ip4))
@@ -215,23 +223,36 @@ public class PcapSpout4jnetpcap implements IRichSpout {
 							Elements js_elements=doc.getElementsByTag("script");
 							if(js_elements.toString().length()>0)
 							{
+								CountJavascriptHttpPacket++;
 								js_code=js_code+"source:"+source+"\r\n";
 								js_code=js_code+"destination:"+destination+"\r\n";
-								System.out.println("source:"+source);
-								System.out.println("destination:"+destination);
 								for(Element js_element:js_elements)
 								{
 									js_code=js_code+js_element.toString()+"\r\n";
-									System.out.println(js_element.toString());
 								}
 							}
 							outputCollector.emit("http",new Values(packet.getCaptureHeader().seconds(),js_code));
 						}
 					}
 				};
+
 				while (pcap.nextEx(hdr, buf) == Pcap.NEXT_EX_OK){
 					pcap.loop(1,packethandler,"asahi");
+					CountPacket++;
 				}
+				try {			
+					FileWriter fw = new FileWriter("C://Users//Think//.ssh//kafkastorm-10Gb-version1//PacketCount.txt",false);
+					fw.write("Packet:"+CountPacket+"\r\n"+"HttpPacket:"+CountHttpPacket+"\r\n"+"JavascriptHttpPacket:"+CountJavascriptHttpPacket+"\r\n");
+					fw.flush();
+					fw.close();
+				} catch (FileNotFoundException e) {
+					// TODO 自动生成的 catch 块
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO 自动生成的 catch 块
+					e.printStackTrace();
+				}
+				pcap.close();
 			}
 			/*else
 			{
