@@ -40,20 +40,7 @@ public class PcapTopo4jnetpcap {
 			 builder.setBolt("PortDistributionBolt2", new PortDistributionBolt(),1).allGrouping("PcapSpout4jnetpcap2","http");
 			 builder.setBolt("PortDistributionBolt3", new PortDistributionBolt(),1).allGrouping("PcapSpout4jnetpcap3","http");
 			 builder.setBolt("PortDistributionBolt4", new PortDistributionBolt(),1).allGrouping("PcapSpout4jnetpcap4","http");
-			 HashMap<String, String> component2Node;
-			 component2Node= new HashMap<String, String>();
-			
-			 component2Node.put("PcapSpout4jnetpcap1", "45.32.70.165");
-			 component2Node.put("PortDistributionBolt1", "45.32.70.165");
 			 
-			 component2Node.put("PcapSpout4jnetpcap2", "45.32.83.185");
-		     component2Node.put("PortDistributionBolt2", "45.32.83.185");
-			 conf.setNumWorkers(10);
-			 
-			//此标识代表topology需要被调度
-		    conf.put("assigned_flag", "1");
-		    //具体的组件节点对信息
-		    conf.put("design_map", component2Node);
 			 
         	 try{
         		 StormSubmitter.submitTopologyWithProgressBar(args[0], conf, builder.createTopology());
