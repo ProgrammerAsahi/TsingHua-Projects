@@ -41,6 +41,7 @@ public class PcapTopo4jnetpcap {
 			 builder.setBolt("PortDistributionBolt3", new PortDistributionBolt(),1).allGrouping("PcapSpout4jnetpcap3","http");
 			 builder.setBolt("PortDistributionBolt4", new PortDistributionBolt(),1).allGrouping("PcapSpout4jnetpcap4","http");
 			 
+			 conf.setNumWorkers(10);
 			 
         	 try{
         		 StormSubmitter.submitTopologyWithProgressBar(args[0], conf, builder.createTopology());
