@@ -32,29 +32,16 @@ public class PcapTopo4jnetpcap {
 			 cluster.shutdown();
 		 }
 		 else{
-			 builder.setSpout("PcapSpout4jnetpcap1", new PcapSpout4jnetpcap(null,-1,null,"F://My Software//pcap//oneday_No.7_201707210100.pcap",null,-1,"topic2"), 1);
-			 builder.setSpout("PcapSpout4jnetpcap2", new PcapSpout4jnetpcap(null,-1,null,"F://My Software//pcap//oneday_No.7_201707210100.pcap",null,-1,"topic5"), 1);
-			 builder.setSpout("PcapSpout4jnetpcap3", new PcapSpout4jnetpcap(null,-1,null,"F://My Software//pcap//oneday_No.7_201707210100.pcap",null,-1,"topic17"), 1);
-			 builder.setSpout("PcapSpout4jnetpcap4", new PcapSpout4jnetpcap(null,-1,null,"F://My Software//pcap//oneday_No.7_201707210100.pcap",null,-1,"topic15"), 1);
+			 builder.setSpout("PcapSpout4jnetpcap1", new PcapSpout4jnetpcap(null,-1,null,null,null,-1,"topic2"), 1);
+			 builder.setSpout("PcapSpout4jnetpcap2", new PcapSpout4jnetpcap(null,-1,null,null,null,-1,"topic5"), 1);
+			 builder.setSpout("PcapSpout4jnetpcap3", new PcapSpout4jnetpcap(null,-1,null,null,null,-1,"topic17"), 1);
+			 builder.setSpout("PcapSpout4jnetpcap4", new PcapSpout4jnetpcap(null,-1,null,null,null,-1,"topic15"), 1);
 			 builder.setBolt("PortDistributionBolt1", new PortDistributionBolt(),1).allGrouping("PcapSpout4jnetpcap1","http");
 			 builder.setBolt("PortDistributionBolt2", new PortDistributionBolt(),1).allGrouping("PcapSpout4jnetpcap2","http");
 			 builder.setBolt("PortDistributionBolt3", new PortDistributionBolt(),1).allGrouping("PcapSpout4jnetpcap3","http");
 			 builder.setBolt("PortDistributionBolt4", new PortDistributionBolt(),1).allGrouping("PcapSpout4jnetpcap4","http");
-			 HashMap<String, String> component2Node;
-			 component2Node= new HashMap<String, String>();
-			
-			 component2Node.put("PcapSpout4jnetpcap1", "45.32.70.165");
-			 component2Node.put("PortDistributionBolt1", "45.32.70.165");
-			 
-			 component2Node.put("PcapSpout4jnetpcap2", "45.32.83.185");
-		     component2Node.put("PortDistributionBolt2", "45.32.83.185");
-			 conf.setNumWorkers(10);
-			 
-			//此标识代表topology需要被调度
-		    conf.put("assigned_flag", "1");
-		    //具体的组件节点对信息
-		    conf.put("design_map", component2Node);
-			 
+
+			 conf.setNumWorkers(10); 
         	 try{
         		 StormSubmitter.submitTopologyWithProgressBar(args[0], conf, builder.createTopology());
         	 }catch (InvalidTopologyException e ){

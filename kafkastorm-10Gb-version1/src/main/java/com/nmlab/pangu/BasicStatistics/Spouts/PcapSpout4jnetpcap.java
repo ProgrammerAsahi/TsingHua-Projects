@@ -146,13 +146,13 @@ public class PcapSpout4jnetpcap implements IRichSpout {
 		// TODO Auto-generated method stub
 		this.outputCollector = spoutOutputCollector;		
         try {         	
-        /*	  this.consumer = kafka.consumer.Consumer.createJavaConsumerConnector(
+        	  this.consumer = kafka.consumer.Consumer.createJavaConsumerConnector(
                     createConsumerConfig());
         	this.topicCountMap = new HashMap<String, Integer>();
             topicCountMap.put(topic, new Integer(1));
             this.consumerMap = consumer.createMessageStreams(topicCountMap);
             this.stream = consumerMap.get(topic).get(0);
-            this.it = stream.iterator(); */
+            this.it = stream.iterator(); 
         	
         	//open device
         	if(srcFilename!=null){
@@ -254,30 +254,73 @@ public class PcapSpout4jnetpcap implements IRichSpout {
 				}
 				pcap.close();
 			}
-			/*else
+			else
 			{
 				while(this.it.hasNext())
 				{
+					String js_code="";
 					byte[] dstpacket=it.next().message();
 					packet = new PcapPacket(dstpacket);
-					if(packet.hasHeader(http)&&packet.hasHeader(html))
-					{
-						//此处为js代码提取部分
-						JBuffer jbuffer = packet;
-						byte[] data_byte=jbuffer.getByteArray(0, packet.size());						
-						String html_code=new String(data_byte);
-						Document doc =Jsoup.parse(html_code);
-						Elements js_elements=doc.getElementsByTag("script");
-						for(Element i:js_elements)
-						{
-							String tag=i.tagName();
-							if(tag.equals("script"))
-								js_code=js_code+"<script>"+i.text()+"</script>"+"\r\n";
+					PcapPacketHandler<String> packethandler = new PcapPacketHandler<String>(){
+						public void nextPacket(PcapPacket packet, String user){
+							String js_code="";
+							String html_code="";
+							ip4 = new Ip4();
+							ip6 = new Ip6();
+							String destination="";
+							String source="";
+							js_code="";
+							if(packet.hasHeader(http))
+								CountHttpPacket++;
+							if(packet.hasHeader(http)&&packet.hasHeader(html))
+							{
+								if(packet.hasHeader(ip4))
+								{
+									destination = FormatUtils.asString(packet.getHeader(ip4).destination());
+									source = FormatUtils.asString(packet.getHeader(ip4).source());
+								}
+								else if(packet.hasHeader(ip6))
+								{
+									destination=FormatUtils.asString(ip6.destination());
+									source= FormatUtils.asString(ip6.source());
+								}
+								//此处为js代码提取部分
+								JBuffer jbuffer = packet;
+								byte[] data_byte=jbuffer.getByteArray(0, packet.size());						
+								html_code=new String(data_byte);
+								Document doc =Jsoup.parse(html_code,"UTF-8");
+								Elements js_elements=doc.getElementsByTag("script");
+								if(js_elements.toString().length()>0)
+								{
+									CountJavascriptHttpPacket++;
+									js_code=js_code+"source:"+source+"\r\n";
+									js_code=js_code+"destination:"+destination+"\r\n";
+									for(Element js_element:js_elements)
+									{
+										js_code=js_code+js_element.toString()+"\r\n";
+									}
+								}
+								outputCollector.emit("http",new Values(packet.getCaptureHeader().seconds(),js_code));
+							}
 						}
-						this.outputCollector.emit("http",new Values(packet.getCaptureHeader().seconds(),js_code));
+					};
+					packethandler.nextPacket(packet, "asahi");
+					CountPacket++;
+					try {			
+						FileWriter fw = new FileWriter("root//storm//log//PacketCount.txt",false);
+						fw.write("Packet:"+CountPacket+"\r\n"+"HttpPacket:"+CountHttpPacket+"\r\n"+"JavascriptHttpPacket:"+CountJavascriptHttpPacket+"\r\n");
+						fw.flush();
+						fw.close();
+					} catch (FileNotFoundException e) {
+						// TODO 自动生成的 catch 块
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO 自动生成的 catch 块
+						e.printStackTrace();
 					}
+					pcap.close();
 				}
-			}*/
+			}
 		} catch(Exception e) {
 			    	System.out.println("fail to deal with packet");
 			    }
